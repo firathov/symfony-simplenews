@@ -1,0 +1,30 @@
+controllers:
+    resource: ../src/Controller/
+    type: annotation
+
+kernel:
+    resource: ../src/Kernel.php
+    type: annotation
+
+index:
+    path: /
+    controller: App\Controller\MainController::index
+
+create:
+    path: /post/create
+    controller: App\Controller\PostController::create
+    methods: [POST]
+
+selectOne:
+    path: /post/show/{id}
+    controller: App\Controller\PostController::show
+    methods: [GET]
+
+update:
+    path: /post/update/{id}
+    controller: App\Controller\PostController::update
+    methods: [POST]
+
+remove:
+    path: /post/remove
+    controller: App\Controller\PostController::remove
