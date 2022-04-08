@@ -19,14 +19,11 @@ class PostController extends AbstractController
      */
     public function create(Request $request, ManagerRegistry $doctrine): Response
     {
-        $date = new \DateTime();
         $entityManager = $doctrine->getManager();
         $post = new Post();
         $post->setTitle($request->get('title'));
         $post->setLink($request->get('link'));
         $post->setAuthorName($request->get('author-name'));
-        $post->setAmountOfUpvotes($request->get('amount-upvotes'));
-        $post->setCreationDate($date);
         $entityManager->persist($post);
         $entityManager->flush();
         return new Response('Saved new post with id ' . $post->getId());
@@ -61,18 +58,17 @@ class PostController extends AbstractController
     }
 
     /**
-     * Action to update a post by Id (Method: POST)
+     * Action to update a post by I'd (Method: POST)
      *
      * @param ManagerRegistry $doctrine
+     * @param int $id
      * @param Request $request
      * @return Response
      */
-    public function update(ManagerRegistry $doctrine, Request $request): Response
+    public function update(ManagerRegistry $doctrine, int $id, Request $request): Response
     {
-        $id = $request->get('id');
         $entityManager = $doctrine->getManager();
         $post = $entityManager->getRepository(Post::class)->find($id);
-
         if (!$post) {
             throw $this->createNotFoundException(
                 'No post found for id ' . $id
@@ -93,6 +89,7 @@ class PostController extends AbstractController
         $post->setLink($data['link']);
         $post->setAuthorName($data['author-name']);
         $post->setAmountOfUpvotes($data['amount-upvotes']);
+        $entityManager->persist($post);
         $entityManager->flush();
 
         return new Response('Updated new post with id ' . $post->getId());

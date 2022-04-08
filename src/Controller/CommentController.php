@@ -9,15 +9,5 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CommentController extends AbstractController
 {
-    /**
-     * Action to create a new comment
-     *
-     * @param Request $request
-     * @param ManagerRegistry $doctrine
-     * @return Response
-     */
-    public function create(): Response
-    {
 
-    }
 }
