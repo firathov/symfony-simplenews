@@ -22,7 +22,7 @@ selectOnePost:
     methods: [GET]
 
 selectAllPosts:
-    path: /post/showAll
+    path: /post/showall
     controller: App\Controller\PostController::showAll
     methods: [GET]
 
@@ -32,11 +32,27 @@ updatePost:
     methods: [POST]
 
 removePost:
-    path: /post/remove
+    path: /post/remove/{id}
     controller: App\Controller\PostController::remove
+    methods: [DELETE]
 
 #Yaml for Comment paths
 createComment:
     path: /comment/create
     controller: App\Controller\CommentController::create
     methods: [POST]
+
+showAllComments:
+    path: /comment/showall
+    controller: App\Controller\CommentController::showAll
+    methods: [GET]
+
+updateComment:
+    path: /comment/update/{id}
+    controller: App\Controller\CommentController::update
+    methods: [POST]
+
+deleteComment:
+    path: /comment/remove/{id}
+    controller: App\Controller\CommentController::remove
+    methods: [DELETE]
