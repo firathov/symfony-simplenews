@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\PostRepository;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
 
 #[ORM\Entity(repositoryClass: PostRepository::class)]
 class Post
@@ -28,7 +27,6 @@ class Post
     private $author_name;
 
     #[ORM\Column(type: 'datetime', nullable: true, options:["default"=>"CURRENT_TIMESTAMP"])]
-//    #[Gedmo\Timestampable(on: 'create')]
     private $creation_date;
 
     public function __construct()
