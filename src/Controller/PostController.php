@@ -56,11 +56,12 @@ class PostController extends AbstractController
             'amount-upvotes' => $post->getAmountofUpvotes()
         ];
         return new Response("ID - " . $data['id'] . "<br>Title - " . $data['title'] . "<br>Link - " .
-            $data['link'] . "<br>Author Name - " . $data['author-name'] . "<br>Creation Date - " . $data['creation-date'] . "<br>Amount of Upvotes - " . $data['amount-upvotes']);
+            $data['link'] . "<br>Author Name - " . $data['author-name'] . "<br>Creation Date - " .
+            $data['creation-date'] . "<br>Amount of Upvotes - " . $data['amount-upvotes']);
     }
 
     /**
-     * Action to create a new post
+     * Action to show all posts in DB
      *
      * @param ManagerRegistry $doctrine
      * @return Response

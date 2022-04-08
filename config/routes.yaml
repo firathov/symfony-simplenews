@@ -10,26 +10,33 @@ index:
     path: /
     controller: App\Controller\MainController::index
 
-create:
+#Yaml for Post paths
+createPost:
     path: /post/create
     controller: App\Controller\PostController::create
     methods: [POST]
 
-selectOne:
+selectOnePost:
     path: /post/show/{id}
     controller: App\Controller\PostController::show
     methods: [GET]
 
-selectAll:
+selectAllPosts:
     path: /post/showAll
     controller: App\Controller\PostController::showAll
     methods: [GET]
 
-update:
+updatePost:
     path: /post/update/{id}
     controller: App\Controller\PostController::update
     methods: [POST]
 
-remove:
+removePost:
     path: /post/remove
     controller: App\Controller\PostController::remove
+
+#Yaml for Comment paths
+createComment:
+    path: /comment/create
+    controller: App\Controller\CommentController::create
+    methods: [POST]
