@@ -117,15 +117,14 @@ class PostController extends AbstractController
     }
 
     /**
-     * Action to delete a post by Id (Method: POST)
+     * Action to delete a post by id (Method: DELETE)
      *
      * @param ManagerRegistry $doctrine
-     * @param Request $request
+     * @param int $id
      * @return Response
      */
-    public function remove(ManagerRegistry $doctrine, Request $request): Response
+    public function remove(ManagerRegistry $doctrine, int $id): Response
     {
-        $id = $request->get('id');
         $entityManager = $doctrine->getManager();
         $post = $entityManager->getRepository(Post::class)->find($id);
 
