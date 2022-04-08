@@ -4,9 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Post;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\Encoder\JsonEncode;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Serializer;
 
 class PostController extends AbstractController
 {
@@ -49,12 +52,29 @@ class PostController extends AbstractController
             'title' => $post->getTitle(),
             'link' => $post->getLink(),
             'author-name' => $post->getAuthorName(),
-            'creation-date' => $post->getCreationDate()->format('d/m/Y'),
+            'creation-date' => $post->getCreationDate(),
             'amount-upvotes' => $post->getAmountofUpvotes()
         ];
         return new Response("ID - " . $data['id'] . "<br>Title - " . $data['title'] . "<br>Link - " .
-            $data['link'] . "<br>Author Name - " . $data['author-name'] . "<br>Creation Date - " .
-            $data['creation-date'] . "<br>Amount of Upvotes - " . $data['amount-upvotes']);
+            $data['link'] . "<br>Author Name - " . $data['author-name'] . "<br>Creation Date - " . $data['creation-date'] . "<br>Amount of Upvotes - " . $data['amount-upvotes']);
+    }
+
+    /**
+     * Action to create a new post
+     *
+     * @param ManagerRegistry $doctrine
+     * @return Response
+     */
+    public function showAll(ManagerRegistry $doctrine): Response
+    {
+        $encoder = [new JsonEncode()];
+        $normalizer = [new ObjectNormalizer()];
+
+        $serializer = new Serializer($normalizer, $encoder);
+        $repository = $doctrine->getRepository(Post::class);
+        $result = $repository->findAll();
+        $jsonContent = $serializer->serialize($result, 'json');
+        return new Response($jsonContent);
     }
 
     /**

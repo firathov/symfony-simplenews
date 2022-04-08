@@ -20,6 +20,11 @@ selectOne:
     controller: App\Controller\PostController::show
     methods: [GET]
 
+selectAll:
+    path: /post/showAll
+    controller: App\Controller\PostController::showAll
+    methods: [GET]
+
 update:
     path: /post/update/{id}
     controller: App\Controller\PostController::update
