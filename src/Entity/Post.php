@@ -12,24 +12,29 @@ class Post
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[ORM\Column(name: 'title',type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     private $title;
 
-    #[ORM\Column(name: 'link', type: 'string', length: 255)]
+    #[ORM\Column(type: 'string', length: 255)]
     private $link;
 
-    #[ORM\Column(name: 'amount_of_upvotes', type: 'integer')]
-    private $amount_of_upvotes;
+    #[ORM\Column(type: 'integer', nullable: true, options:["default"=>0])]
+    private $amount_of_upvotes = 0;
 
-    #[ORM\Column(name: 'author_name', type: 'string', length: 45)]
+    #[ORM\Column(type: 'string', length: 45)]
     private $author_name;
 
-    #[ORM\Column(name: 'creation_date', type: 'datetime', nullable: true)]
-    #[Gedmo\Timestampable(on: 'create')]
+    #[ORM\Column(type: 'datetime', nullable: true, options:["default"=>"CURRENT_TIMESTAMP"])]
+//    #[Gedmo\Timestampable(on: 'create')]
     private $creation_date;
+
+    public function __construct()
+    {
+        $this->creation_date = new DateTime();
+    }
 
     public function getId(): ?int
     {
@@ -84,9 +89,9 @@ class Post
         return $this;
     }
 
-    public function getCreationDate(): ?\DateTimeInterface
+    public function getCreationDate(): string
     {
-        return $this->creation_date;
+        return $this->creation_date->format('Y-m-d H:i:s');
     }
 
     public function setCreationDate(?\DateTimeInterface $creation_date): DateTime
