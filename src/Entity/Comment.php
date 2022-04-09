@@ -23,6 +23,9 @@ class Comment
     #[ORM\Column(type: 'datetime', nullable: true, options:["default"=>"CURRENT_TIMESTAMP"])]
     private $creation_date;
 
+    #[ORM\Column(type: 'integer')]
+    private $post_id;
+
     public function __construct()
     {
         $this->creation_date = new DateTime();
@@ -67,5 +70,17 @@ class Comment
         $this->creation_date = new DateTime();
 
         return $this->creation_date;
+    }
+
+    public function getPostId(): ?int
+    {
+        return $this->post_id;
+    }
+
+    public function setPostId(int $post_id): self
+    {
+        $this->post_id = $post_id;
+
+        return $this;
     }
 }
