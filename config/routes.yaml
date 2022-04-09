@@ -43,21 +43,26 @@ upvotePost:
 
 #Yaml for Comment paths
 createComment:
-    path: /comment/create
+    path: /post/{postId}/comment/create
     controller: App\Controller\CommentController::create
     methods: [POST]
 
+showOneComment:
+    path: /post/{postId}/comment/showone/{id}
+    controller: App\Controller\CommentController::showOne
+    methods: [GET]
+
 showAllComments:
-    path: /comment/showall
+    path: /post/{postId}/comment/showall
     controller: App\Controller\CommentController::showAll
     methods: [GET]
 
 updateComment:
-    path: /comment/update/{id}
+    path: /post/{postId}/comment/update/{id}
     controller: App\Controller\CommentController::update
-    methods: [POST]
+    methods: [PUT]
 
 deleteComment:
-    path: /comment/remove/{id}
+    path: /post/comment/remove/{id}
     controller: App\Controller\CommentController::remove
     methods: [DELETE]

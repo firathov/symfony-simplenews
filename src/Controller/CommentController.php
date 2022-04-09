@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Comment;
+use App\Helper\TypeConverter;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,70 +14,103 @@ use Symfony\Component\Serializer\Serializer;
 
 class CommentController extends AbstractController
 {
+    private Response $response;
+
+    private Request $request;
+
+    public function __construct() {
+        $this->response = new Response();
+        $this->response->headers->set('Content-Type', 'application/json');
+    }
+
+    private function getParams(): array
+    {
+        return json_decode($this->request->getContent(), true);;
+    }
+
+    private function findById($id, ManagerRegistry $doctrine): object
+    {
+        $repository = $doctrine->getRepository(Comment::class)->find($id);
+        if (!$repository) {
+            throw $this->createNotFoundException(
+                'No comment found for id '.$id
+            );
+        }
+        return $repository;
+    }
+
     /**
      * Action to create a new comment
      *
+     * @param $postId
      * @param Request $request
      * @param ManagerRegistry $doctrine
      * @return Response
      */
-    public function create(Request $request, ManagerRegistry $doctrine): Response
+    public function create($postId, Request $request, ManagerRegistry $doctrine): Response
     {
+        $post = (new PostController())->findById($postId,$doctrine);
+        $this->request = $request;
         $entityManager = $doctrine->getManager();
         $comment = new Comment();
-        $comment->setAuthorName($request->get('author-name'));
-        $comment->setContent($request->get('content'));
+        $params = $this->getParams();
+        $comment->setContent($params['content']);
+        $comment->setAuthorName($params['author_name']);
+        $comment->setPostId($post->getId());
         $entityManager->persist($comment);
         $entityManager->flush();
         return new Response('Saved new comment with id ' . $comment->getId());
     }
 
     /**
-     * Action to show all comments from DB
+     * Action to show comment by ID from DB
      *
+     * @param $id
+     * @param $postId
      * @param ManagerRegistry $doctrine
      * @return Response
      */
-    public function showAll(ManagerRegistry $doctrine):Response
+    public function showOne($id, $postId, ManagerRegistry $doctrine): object
     {
-        $encoder = [new JsonEncode()];
-        $normalizer = [new ObjectNormalizer()];
-
-        $serializer = new Serializer($normalizer, $encoder);
-        $repository = $doctrine->getRepository(Comment::class);
-        $result = $repository->findAll();
-        $jsonContent = $serializer->serialize($result, 'json');
-        return new Response($jsonContent);
+        $repository = $doctrine->getRepository(Comment::class)->findBy(array('id'=>$id,'post_id'=>$postId));
+        $jsonContent = TypeConverter::objectToJson($repository);
+        return $this->response->setContent($jsonContent);
     }
 
     /**
-     * Action to update a comment by I'd (Method: POST)
+     * Action to show all comments from DB
+     *
+     * @param $postId
+     * @param ManagerRegistry $doctrine
+     * @return Response
+     */
+    public function showAll($postId, ManagerRegistry $doctrine):object
+    {
+        $repository = $doctrine->getRepository(Comment::class)->findBy(array('post_id'=>$postId));
+        $jsonContent = TypeConverter::objectToJson($repository);
+        return $this->response->setContent($jsonContent);
+    }
+
+    /**
+     * Action to update a comment by id (Method: PUT)
      *
      * @param ManagerRegistry $doctrine
+     * @param $postId
      * @param int $id
      * @param Request $request
      * @return Response
      */
-    public function update(ManagerRegistry $doctrine, int $id, Request $request): Response
+    public function update(ManagerRegistry $doctrine, $postId, int $id, Request $request): Response
     {
+        (new PostController())->findById($postId,$doctrine);
+        $this->request = $request;
         $entityManager = $doctrine->getManager();
-        $comment = $entityManager->getRepository(Comment::class)->find($id);
-        if (!$comment) {
-            throw $this->createNotFoundException(
-                'No post found for id ' . $id
-            );
-        }
-
-        $data = $request->get('content');
-
-        if (!isset($data)) {
-            return new Response("Invalid Input");
-        }
-        $comment->setContent($data);
-        $entityManager->persist($comment);
+        $params = $this->getParams();
+        $comment = $this->findById($id,$doctrine);
+        $comment->setContent($params['content']);
+        $comment->setAuthorName($params['author_name']);
         $entityManager->flush();
-
-        return new Response('Comment with id ' . $comment->getId() . ' updated');
+        return $this->response->setContent("Comment with id ". $comment->getId() . "updated");
     }
 
     /**
@@ -89,16 +123,9 @@ class CommentController extends AbstractController
     public function remove(ManagerRegistry $doctrine, int $id): Response
     {
         $entityManager = $doctrine->getManager();
-        $comment = $entityManager->getRepository(Comment::class)->find($id);
-
-        if (!$comment) {
-            throw $this->createNotFoundException(
-                'No product found for id ' . $id
-            );
-        }
+        $comment = $this->findById($id,$doctrine);
         $entityManager->remove($comment);
         $entityManager->flush();
-
-        return new Response('Comment has been deleted');
+        return $this->response->setContent("Comment deleted");
     }
 }
