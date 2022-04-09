@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Post;
+use App\Helper\TypeConverter;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,6 +14,31 @@ use Symfony\Component\Serializer\Serializer;
 
 class PostController extends AbstractController
 {
+    private Response $response;
+
+    private Request $request;
+
+    public function __construct() {
+        $this->response = new Response();
+        $this->response->headers->set('Content-Type', 'application/json');
+    }
+
+    private function getParams(): array
+    {
+        return json_decode($this->request->getContent(), true);
+    }
+
+    public function findById($id, ManagerRegistry $doctrine): object
+    {
+        $repository = $doctrine->getRepository(Post::class)->find($id);
+        if (!$repository) {
+            throw $this->createNotFoundException(
+                'No post found for id '.$id
+            );
+        }
+        return $repository;
+    }
+
     /**
      * Action to create a new post
      *
@@ -22,14 +48,16 @@ class PostController extends AbstractController
      */
     public function create(Request $request, ManagerRegistry $doctrine): Response
     {
+        $this->request = $request;
         $entityManager = $doctrine->getManager();
         $post = new Post();
-        $post->setTitle($request->get('title'));
-        $post->setLink($request->get('link'));
-        $post->setAuthorName($request->get('author-name'));
+        $params = $this->getParams();
+        $post->setTitle($params['title']);
+        $post->setLink($params['link']);
+        $post->setAuthorName($params['author_name']);
         $entityManager->persist($post);
         $entityManager->flush();
-        return new Response('Saved new post with id ' . $post->getId());
+        return $this->response->setContent('Saved new post with id ' . $post->getId());
     }
 
     /**
@@ -41,23 +69,9 @@ class PostController extends AbstractController
      */
     public function show(ManagerRegistry $doctrine, int $id): Response
     {
-        $post = $doctrine->getRepository(Post::class)->find($id);
-        if (!$post) {
-            throw $this->createNotFoundException(
-                'No product found for id ' . $id
-            );
-        }
-        $data = [
-            'id' => $post->getId(),
-            'title' => $post->getTitle(),
-            'link' => $post->getLink(),
-            'author-name' => $post->getAuthorName(),
-            'creation-date' => $post->getCreationDate(),
-            'amount-upvotes' => $post->getAmountofUpvotes()
-        ];
-        return new Response("ID - " . $data['id'] . "<br>Title - " . $data['title'] . "<br>Link - " .
-            $data['link'] . "<br>Author Name - " . $data['author-name'] . "<br>Creation Date - " .
-            $data['creation-date'] . "<br>Amount of Upvotes - " . $data['amount-upvotes']);
+        $post = $this->findById($id,$doctrine);
+        $jsonContent = TypeConverter::objectToJson($post);
+        return $this->response->setContent($jsonContent);
     }
 
     /**
@@ -68,14 +82,10 @@ class PostController extends AbstractController
      */
     public function showAll(ManagerRegistry $doctrine): Response
     {
-        $encoder = [new JsonEncode()];
-        $normalizer = [new ObjectNormalizer()];
-
-        $serializer = new Serializer($normalizer, $encoder);
         $repository = $doctrine->getRepository(Post::class);
         $result = $repository->findAll();
-        $jsonContent = $serializer->serialize($result, 'json');
-        return new Response($jsonContent);
+        $jsonContent = TypeConverter::objectToJson($result);
+        return $this->response->setContent($jsonContent);
     }
 
     /**
@@ -88,32 +98,15 @@ class PostController extends AbstractController
      */
     public function update(ManagerRegistry $doctrine, int $id, Request $request): Response
     {
+        $this->request = $request;
         $entityManager = $doctrine->getManager();
-        $post = $entityManager->getRepository(Post::class)->find($id);
-        if (!$post) {
-            throw $this->createNotFoundException(
-                'No post found for id ' . $id
-            );
-        }
-        $data = [
-            'title' => $request->get('title'),
-            'link' => $request->get('link'),
-            'author-name' => $request->get('author-name'),
-            'amount-upvotes' => $request->get('amount-upvotes')
-        ];
-
-        if (!isset($data['title']) || !isset($data['link']) || !isset($data['author-name'])
-            || !isset($data['amount-upvotes'])) {
-            return new Response("Invalid Input");
-        }
-        $post->setTitle($data['title']);
-        $post->setLink($data['link']);
-        $post->setAuthorName($data['author-name']);
-        $post->setAmountOfUpvotes($data['amount-upvotes']);
-        $entityManager->persist($post);
+        $params = $this->getParams();
+        $post = $this->findById($id,$doctrine);
+        $post->setTitle($params['title']);
+        $post->setLink($params['link']);
+        $post->setAuthorName($params['author_name']);
         $entityManager->flush();
-
-        return new Response('Updated new post with id ' . $post->getId());
+        return $this->response->setContent("Updated post with id ". $post->getId());
     }
 
     /**
@@ -126,16 +119,9 @@ class PostController extends AbstractController
     public function remove(ManagerRegistry $doctrine, int $id): Response
     {
         $entityManager = $doctrine->getManager();
-        $post = $entityManager->getRepository(Post::class)->find($id);
-
-        if (!$post) {
-            throw $this->createNotFoundException(
-                'No product found for id ' . $id
-            );
-        }
+        $post = $this->findById($id,$doctrine);
         $entityManager->remove($post);
         $entityManager->flush();
-
-        return new Response('Post has been deleted');
+        return $this->response->setContent("Post deleted");
     }
 }
