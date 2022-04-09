@@ -124,4 +124,23 @@ class PostController extends AbstractController
         $entityManager->flush();
         return $this->response->setContent("Post deleted");
     }
+
+    /**
+     * Action to update a post's comment by id (Method: DELETE)
+     *
+     * @param int $id
+     * @param ManagerRegistry $doctrine
+     * @param Request $request
+     * @return Response
+     */
+    public function upvotePost(int $id, ManagerRegistry $doctrine, Request $request): Response
+    {
+        $this->request = $request;
+        $entityManager = $doctrine->getManager();
+        $params = $this->getParams();
+        $post = $this->findById($id,$doctrine);
+        $post->setAmountOfUpvotes($post->getAmountOfUpvotes() + $params['point']);
+        $entityManager->flush();
+        return $this->response->setContent("You rated post with id ". $post->getId());
+    }
 }
