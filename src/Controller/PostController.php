@@ -8,9 +8,6 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\Encoder\JsonEncode;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class PostController extends AbstractController
 {
@@ -23,11 +20,23 @@ class PostController extends AbstractController
         $this->response->headers->set('Content-Type', 'application/json');
     }
 
+    /**
+     * Function to get whole request from Front-side
+     *
+     * @return array
+     */
     private function getParams(): array
     {
         return json_decode($this->request->getContent(), true);
     }
 
+    /**
+     * Function to get post by ID
+     *
+     * @param $id
+     * @param ManagerRegistry $doctrine
+     * @return Response
+     */
     public function findById($id, ManagerRegistry $doctrine): object
     {
         $repository = $doctrine->getRepository(Post::class)->find($id);
@@ -40,7 +49,7 @@ class PostController extends AbstractController
     }
 
     /**
-     * Action to create a new post
+     * Action to create a new post (Method: POST)
      *
      * @param Request $request
      * @param ManagerRegistry $doctrine
@@ -75,7 +84,7 @@ class PostController extends AbstractController
     }
 
     /**
-     * Action to show all posts in DB
+     * Action to show all posts in DB (Method: GET)
      *
      * @param ManagerRegistry $doctrine
      * @return Response
@@ -89,7 +98,7 @@ class PostController extends AbstractController
     }
 
     /**
-     * Action to update a post by I'd (Method: POST)
+     * Action to update a post by I'd (Method: PUT)
      *
      * @param ManagerRegistry $doctrine
      * @param int $id
@@ -126,7 +135,7 @@ class PostController extends AbstractController
     }
 
     /**
-     * Action to update a post's comment by id (Method: DELETE)
+     * Action to update a post's comment by id (Method: POST)
      *
      * @param int $id
      * @param ManagerRegistry $doctrine
