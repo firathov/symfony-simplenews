@@ -29,7 +29,7 @@ selectAllPosts:
 updatePost:
     path: /post/update/{id}
     controller: App\Controller\PostController::update
-    methods: [POST]
+    methods: [PUT]
 
 removePost:
     path: /post/remove/{id}
