@@ -36,6 +36,11 @@ removePost:
     controller: App\Controller\PostController::remove
     methods: [DELETE]
 
+upvotePost:
+    path: /post/{id}/upvote
+    controller: App\Controller\PostController::upvotePost
+    methods: [POST]
+
 #Yaml for Comment paths
 createComment:
     path: /comment/create
