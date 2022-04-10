@@ -12,10 +12,10 @@ class TypeConverter
 {
     public static function objectToJson($objectData): string
     {
-        $encode = [new JsonEncoder()];
-        $normalize = [new ObjectNormalizer()];
+        $encode = [new JsonEncoder()]; // array to JSON
+        $normalize = [new ObjectNormalizer()]; // object to array
 
-        $serializer = new Serializer($normalize, $encode);
+        $serializer = new Serializer($normalize, $encode); // merge them
         return $serializer->serialize($objectData, 'json');
     }
 }
